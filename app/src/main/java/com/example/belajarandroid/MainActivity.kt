@@ -6,13 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,7 +31,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BelajarAndroidTheme {
-                Box(modifier = Modifier.safeDrawingPadding()) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .safeDrawingPadding(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     ExpenseApp(
                         name = "Neti Prinayani",
                         npm = "2407051010"
@@ -43,21 +51,21 @@ class MainActivity : ComponentActivity() {
 fun ExpenseApp(name: String, npm: String) {
     val allExpenses = ExpenseSource.dummyExpenses
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(24.dp),
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        item {
-            Column {
-                Text(text = "Identitas Pemilik:", style = MaterialTheme.typography.labelSmall)
-                Text(text = name, fontWeight = FontWeight.Bold)
-                Text(text = "NPM: $npm")
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+        Column {
+            Text(text = "Identitas Pemilik:", style = MaterialTheme.typography.labelSmall)
+            Text(text = name, fontWeight = FontWeight.Bold)
+            Text(text = "NPM: $npm")
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        items(allExpenses) { expense ->
+        allExpenses.forEach { expense ->
             ExpenseDetailScreen(expense = expense)
         }
     }
@@ -65,15 +73,32 @@ fun ExpenseApp(name: String, npm: String) {
 
 @Composable
 fun ExpenseDetailScreen(expense: SmartExpenseNote) {
+    var isFavorite by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        Image(
-            painter = painterResource(id = expense.imageRes),
-            contentDescription = expense.nama,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            contentScale = ContentScale.Crop
-        )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Image(
+                painter = painterResource(id = expense.imageRes),
+                contentDescription = expense.nama,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            IconButton(
+                onClick = { isFavorite = !isFavorite },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite Icon",
+                    tint = if (isFavorite) Color.Red else Color.White
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -102,7 +127,7 @@ fun ExpenseDetailScreen(expense: SmartExpenseNote) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { },
+            onClick = { /* Handle Klik */ },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Pesan Sekarang")
@@ -110,13 +135,11 @@ fun ExpenseDetailScreen(expense: SmartExpenseNote) {
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun ExpenseAppPreview() {
     BelajarAndroidTheme {
-        ExpenseApp(
-            name = "Neti Prinayani",
-            npm = "2407051010"
-        )
+        ExpenseApp(name = "Neti Prinayani", npm = "2407051010")
     }
 }
