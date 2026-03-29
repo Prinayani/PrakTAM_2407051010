@@ -6,8 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -32,15 +34,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             BelajarAndroidTheme {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .safeDrawingPadding(),
+                    modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ExpenseApp(
-                        name = "Neti Prinayani",
-                        npm = "2407051010"
-                    )
+                    ExpenseApp(name = "Neti Prinayani", npm = "2407051010")
                 }
             }
         }
@@ -51,22 +48,87 @@ class MainActivity : ComponentActivity() {
 fun ExpenseApp(name: String, npm: String) {
     val allExpenses = ExpenseSource.dummyExpenses
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .statusBarsPadding(),
+        contentPadding = PaddingValues(24.dp)
     ) {
-        Column {
-            Text(text = "Identitas Pemilik:", style = MaterialTheme.typography.labelSmall)
-            Text(text = name, fontWeight = FontWeight.Bold)
-            Text(text = "NPM: $npm")
-            Spacer(modifier = Modifier.height(16.dp))
+        item {
+            Column {
+                Text(text = "Identitas Pemilik:", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    text = name,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(text = "NPM: $npm")
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
 
-        allExpenses.forEach { expense ->
+        item {
+            Text(
+                text = "Ringkasan Pengeluaran",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(allExpenses) { expense ->
+                    ExpenseRowItem(expense = expense)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(45.dp))
+
+            Text(
+                text = "Riwayat Transaksi Terkini",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
+        items(allExpenses) { expense ->
             ExpenseDetailScreen(expense = expense)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun ExpenseRowItem(expense: SmartExpenseNote) {
+    Card(
+        modifier = Modifier.width(160.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column {
+            Image(
+                painter = painterResource(id = expense.imageRes),
+                contentDescription = expense.nama,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
+                contentScale = ContentScale.Crop
+            )
+            Column(modifier = Modifier.padding(8.dp)) {
+                Text(
+                    text = expense.nama,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = "Rp ${expense.harga}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
@@ -75,66 +137,77 @@ fun ExpenseApp(name: String, npm: String) {
 fun ExpenseDetailScreen(expense: SmartExpenseNote) {
     var isFavorite by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(id = expense.imageRes),
-                contentDescription = expense.nama,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentScale = ContentScale.Crop
-            )
-
-            IconButton(
-                onClick = { isFavorite = !isFavorite },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Favorite Icon",
-                    tint = if (isFavorite) Color.Red else Color.White
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Box {
+                Image(
+                    painter = painterResource(id = expense.imageRes),
+                    contentDescription = expense.nama,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
                 )
+
+                IconButton(
+                    onClick = { isFavorite = !isFavorite },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = "Favorite Icon",
+                        tint = if (isFavorite) Color.Red else Color.White
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = Modifier.padding(16.dp)) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = expense.nama,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
+                Text(
+                    text = expense.nama,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
 
-        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = expense.deskripsi,
-            style = MaterialTheme.typography.bodyLarge
-        )
+                Text(
+                    text = expense.deskripsi,
+                    style = MaterialTheme.typography.bodyLarge
+                )
 
-        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Harga: Rp ${expense.harga}",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold
-        )
+                Text(
+                    text = "Harga: Rp ${expense.harga}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
-        Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { /* Handle Klik */ },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Pesan Sekarang")
+                Button(
+                    onClick = { /* Handle Pesan */ },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Lihat Detail")
+                }
+            }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
