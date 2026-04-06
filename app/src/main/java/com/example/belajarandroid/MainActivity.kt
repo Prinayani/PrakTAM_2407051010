@@ -56,13 +56,20 @@ fun ExpenseApp(name: String, npm: String) {
     ) {
         item {
             Column {
-                Text(text = "Identitas Pemilik:", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    text = "Identitas Pemilik:",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
                 Text(
                     text = name,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
-                Text(text = "NPM: $npm")
+                Text(
+                    text = "NPM: $npm",
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
@@ -76,7 +83,8 @@ fun ExpenseApp(name: String, npm: String) {
             )
 
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
             ) {
                 items(allExpenses) { expense ->
                     ExpenseRowItem(expense = expense)
@@ -94,7 +102,7 @@ fun ExpenseApp(name: String, npm: String) {
         }
 
         items(allExpenses) { expense ->
-            ExpenseDetailScreen(expense = expense)
+            ExpenseDetailCard(expense = expense)
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -105,7 +113,9 @@ fun ExpenseRowItem(expense: SmartExpenseNote) {
     Card(
         modifier = Modifier.width(160.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column {
             Image(
@@ -119,13 +129,13 @@ fun ExpenseRowItem(expense: SmartExpenseNote) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = expense.nama,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
                 Text(
                     text = "Rp ${expense.harga}",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
@@ -134,16 +144,16 @@ fun ExpenseRowItem(expense: SmartExpenseNote) {
 }
 
 @Composable
-fun ExpenseDetailScreen(expense: SmartExpenseNote) {
+fun ExpenseDetailCard(expense: SmartExpenseNote) {
     var isFavorite by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Box {
@@ -171,38 +181,40 @@ fun ExpenseDetailScreen(expense: SmartExpenseNote) {
             }
 
             Column(modifier = Modifier.padding(16.dp)) {
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = expense.nama,
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = expense.deskripsi,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text = "Harga: Rp ${expense.harga}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { /* Handle Pesan */ },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Lihat Detail")
+                    Text(
+                        text = "Total: Rp ${expense.harga}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Button(
+                        onClick = { /* Handle Detail */ },
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Detail")
+                    }
                 }
             }
         }
