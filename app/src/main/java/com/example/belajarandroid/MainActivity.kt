@@ -51,7 +51,6 @@ fun ExpenseApp(name: String, npm: String) {
     val allExpenses = ExpenseSource.dummyExpenses
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
